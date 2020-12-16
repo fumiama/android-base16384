@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Base16384</string>
+    <string name="encode">编码</string>
+    <string name="decode">解码</string>
+    <string name="text_original">原文</string>
+    <string name="text_encoded">密文</string>
+    <string name="permissionDenied">权限被拒绝</string>
+    <string name="share">保存处理后的文件</string>
+    <string name="read_file_err">读取文件错误！</string>
+    <string name="succeed">成功</string>
+    <string name="failed">失败</string>
+    <string name="output">输出</string>
+</resources>

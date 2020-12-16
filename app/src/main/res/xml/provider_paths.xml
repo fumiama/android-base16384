@@ -1,0 +1,5 @@
+<paths>
+    <external-files-path name="ef" path="."/>
+    <files-path name="if" path="."/>
+    <cache-path name="cf" path="."/>
+</paths>
