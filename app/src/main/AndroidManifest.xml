@@ -11,15 +11,6 @@
         android:theme="@style/AppTheme">
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="top.fumiama.base16384.test.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths" />
-        </provider>
-        <provider
-            android:name="androidx.core.content.FileProvider"
             android:authorities="top.fumiama.base16384.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
