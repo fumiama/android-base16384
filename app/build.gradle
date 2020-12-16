@@ -44,9 +44,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
-        debug{
-            applicationIdSuffix '.test'
-        }
     }
     externalNativeBuild {
         cmake {
@@ -61,6 +58,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    ndkVersion '22.0.7026061'
 }
 
 dependencies {
