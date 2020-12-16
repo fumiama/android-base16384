@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Base16384</string>
+    <string name="encode">encode</string>
+    <string name="decode">decode</string>
+    <string name="text_original">Original Text</string>
+    <string name="text_encoded">Encoded Text</string>
+    <string name="permissionDenied">permission denied</string>
+    <string name="share">Save Produced File</string>
+    <string name="read_file_err">Read File Error!</string>
+    <string name="succeed">succeed</string>
+    <string name="failed">failed</string>
+    <string name="output">output</string>
+</resources>
