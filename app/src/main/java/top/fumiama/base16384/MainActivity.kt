@@ -2,6 +2,10 @@ package top.fumiama.base16384
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -11,6 +15,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.material.textfield.TextInputEditText
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.io.FileInputStream
@@ -19,6 +24,7 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         sv.viewTreeObserver.addOnGlobalLayoutListener {
             val h = sv.getChildAt(0).height
             tti.visibility = if(h > resources.displayMetrics.heightPixels) View.GONE else View.VISIBLE
@@ -32,6 +38,7 @@ class MainActivity : Activity() {
                     inputFile.writeText(it.toString(), Charsets.UTF_16BE)
                     encode(inputFile.absolutePath, outputFile.absolutePath)
                     tde.setText(outputFile.readText(Charsets.UTF_16BE))
+                    copyText(tde, cm)
                 }
             }
         }
@@ -43,8 +50,13 @@ class MainActivity : Activity() {
                     inputFile.writeText(it.toString(), Charsets.UTF_16BE)
                     decode(inputFile.absolutePath, outputFile.absolutePath)
                     ten.setText(outputFile.readText(Charsets.UTF_16BE))
+                    copyText(ten, cm)
                 }
             }
+        }
+        tti.setOnLongClickListener {
+            AlertDialog.Builder(this).setTitle(R.string.info).setMessage(R.string.info_content).setIcon(R.mipmap.ic_launcher).show()
+            true
         }
     }
 
@@ -86,16 +98,19 @@ class MainActivity : Activity() {
         val inputFile = generateCacheFile("input")
         val outputFile = generateCacheFile("output")
         saveFile(inputFile, uri)
-        val br = inputFile.bufferedReader(Charsets.US_ASCII)
-        val head1 = br.read()
-        val head2 = br.read()
-        val re = if(head1 == 0xFE && head2 == 0xFF) decode(inputFile.absolutePath, outputFile.absolutePath)
+        val bbf = ByteArray(2)
+        val br = inputFile.inputStream()
+        br.read(bbf)
+        br.close()
+        val isDecode = bbf[0] == (-2).toByte() && bbf[1] == (-1).toByte()
+
+        val re = if(isDecode) decode(inputFile.absolutePath, outputFile.absolutePath)
         else encode(inputFile.absolutePath, outputFile.absolutePath)
         Toast.makeText(
             this,
             if(re == 0) {
                 createFile(getString(R.string.output))
-                R.string.succeed
+                if(isDecode) R.string.decode_succeed else R.string.encode_succeed
             } else R.string.failed,
             Toast.LENGTH_SHORT
         ).show()
@@ -168,6 +183,14 @@ class MainActivity : Activity() {
     }
     
     private fun generateCacheFile(name: String) = File(cacheDir, name)
+
+    private fun copyText(t: TextInputEditText, cm: ClipboardManager){
+        if(t.text?.isNotEmpty() == true) {
+            //t.selectAll()
+            ClipData.newPlainText(getString(R.string.app_name), t.text)?.let { cm.setPrimaryClip(it) }
+            Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     /**
      * A native method that is implemented by the 'native-lib' native library,
