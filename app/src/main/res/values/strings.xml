@@ -4,10 +4,15 @@
     <string name="decode">decode</string>
     <string name="text_original">Original Text</string>
     <string name="text_encoded">Encoded Text</string>
-    <string name="permissionDenied">permission denied</string>
+    <string name="permissionDenied">Permission Denied</string>
     <string name="share">Save Produced File</string>
     <string name="read_file_err">Read File Error!</string>
-    <string name="succeed">succeed</string>
-    <string name="failed">failed</string>
+    <string name="succeed">Succeed</string>
+    <string name="failed">Failed</string>
     <string name="output">output</string>
+    <string name="decode_succeed">Decode Succeed</string>
+    <string name="encode_succeed">Encode Succeed</string>
+    <string name="info">Info</string>
+    <string name="info_content">Author: Fumiama, with precious supports of the members in Sakura Anime Club.</string>
+    <string name="copied">Copied Text</string>
 </resources>
