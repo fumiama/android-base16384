@@ -8,6 +8,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -25,39 +26,16 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        sv.viewTreeObserver.addOnGlobalLayoutListener {
-            val h = sv.getChildAt(0).height
-            tti.visibility = if(h > resources.displayMetrics.heightPixels) View.GONE else View.VISIBLE
-        }
+        sv.viewTreeObserver.addOnGlobalLayoutListener { setTitleVisibility() }
         fab.setOnClickListener { if(checkReadPermission()) pickFile() }
-        ben.setOnClickListener {
-            ten.text?.let {
-                if(it.isNotEmpty()){
-                    val inputFile = generateCacheFile("input")
-                    val outputFile = generateCacheFile("output")
-                    inputFile.writeText(it.toString(), Charsets.UTF_16BE)
-                    encode(inputFile.absolutePath, outputFile.absolutePath)
-                    tde.setText(outputFile.readText(Charsets.UTF_16BE))
-                    copyText(tde, cm)
-                }
-            }
-        }
-        bde.setOnClickListener {
-            tde.text?.let {
-                if(it.isNotEmpty()){
-                    val inputFile = generateCacheFile("input")
-                    val outputFile = generateCacheFile("output")
-                    inputFile.writeText(it.toString(), Charsets.UTF_16BE)
-                    decode(inputFile.absolutePath, outputFile.absolutePath)
-                    ten.setText(outputFile.readText(Charsets.UTF_16BE))
-                    copyText(ten, cm)
-                }
-            }
-        }
+        ben.setOnClickListener { clickButton(true, cm) }
+        bde.setOnClickListener { clickButton(false, cm) }
         tti.setOnLongClickListener {
             AlertDialog.Builder(this).setTitle(R.string.info).setMessage(R.string.info_content).setIcon(R.mipmap.ic_launcher).show()
             true
         }
+        setLongPress2Paste(ten, cm)
+        setLongPress2Paste(tde, cm)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -80,19 +58,6 @@ class MainActivity : Activity() {
             }
         }
     }
-
-    /*private fun packZip(zipf: File, outf: File){
-        zipf.parentFile?.let { if(!it.exists()) it.mkdirs() }
-        if(zipf.exists()) zipf.delete()
-        zipf.createNewFile()
-        val zip = ZipOutputStream(CheckedOutputStream(zipf.outputStream(), CRC32()))
-        zip.setLevel(9)
-        zip.putNextEntry(ZipEntry("output"))
-        zip.write(outf.readBytes())
-        zip.flush()
-        zip.close()
-    }*/
-
 
     private fun doFromFile(uri: Uri){
         val inputFile = generateCacheFile("input")
@@ -147,21 +112,6 @@ class MainActivity : Activity() {
         startActivityForResult(intent, 2)
     }
 
-    /*private fun shareFile(file: File, type: String) {
-        if (file.exists()) {
-            val share = Intent(Intent.ACTION_SEND)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                val contentUri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", file)
-                share.putExtra(Intent.EXTRA_STREAM, contentUri)
-                share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }else share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file))
-            share.type = type //此处可发送多种文件
-            share.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            startActivity(Intent.createChooser(share, getString(R.string.share)))
-        } else Toast.makeText(this, getString(R.string.read_file_err), Toast.LENGTH_SHORT).show()
-    }*/
-
     private fun checkReadPermission(): Boolean {
         return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N && ContextCompat.checkSelfPermission(
                 this,
@@ -186,10 +136,39 @@ class MainActivity : Activity() {
 
     private fun copyText(t: TextInputEditText, cm: ClipboardManager){
         if(t.text?.isNotEmpty() == true) {
-            //t.selectAll()
             ClipData.newPlainText(getString(R.string.app_name), t.text)?.let { cm.setPrimaryClip(it) }
-            Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.copied)+t.text, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun setLongPress2Paste(t: TextInputEditText, cm: ClipboardManager){
+        t.setOnLongClickListener {
+            if(t.text?.isEmpty() == true) t.setText(cm.primaryClip?.getItemAt(0)?.text)
+            false
+        }
+    }
+
+    private fun clickButton(isEncode: Boolean, cm:ClipboardManager){
+        val tin = if(isEncode)ten else tde
+        val tou = if(isEncode)tde else ten
+        tin.text?.let {
+            if(it.isNotEmpty()){
+                val inputFile = generateCacheFile("input")
+                val outputFile = generateCacheFile("output")
+                inputFile.writeText(it.toString(), Charsets.UTF_16BE)
+                if(isEncode) encode(inputFile.absolutePath, outputFile.absolutePath)
+                else decode(inputFile.absolutePath, outputFile.absolutePath)
+                tou.setText(outputFile.readText(Charsets.UTF_16BE))
+                copyText(tou, cm)
+            }
+        }
+    }
+
+    private fun setTitleVisibility(){
+        val h = sv.getChildAt(0).height
+        val r = Rect()
+        window.decorView.rootView.getWindowVisibleDisplayFrame(r)
+        tti.visibility = if(h > r.bottom) View.GONE else View.VISIBLE
     }
 
     /**
