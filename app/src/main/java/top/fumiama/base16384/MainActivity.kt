@@ -13,23 +13,36 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.android.synthetic.main.activity_main.*
+import top.fumiama.base16384.tools.PropertiesTools
 import java.io.File
 import java.io.FileInputStream
+import java.nio.charset.Charset
 
 class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val pCharsets = PropertiesTools(File(filesDir, "charsets.prop"))
         sv.viewTreeObserver.addOnGlobalLayoutListener { setTitleVisibility() }
-        fab.setOnClickListener { if(checkReadPermission()) pickFile() }
-        ben.setOnClickListener { clickButton(true, cm) }
-        bde.setOnClickListener { clickButton(false, cm) }
+        fab.setOnClickListener { pickFile() }
+        ben.setOnClickListener { clickButton(true, cm, pCharsets) }
+        bde.setOnClickListener { clickButton(false, cm, pCharsets) }
+        ben.setOnLongClickListener {
+            callCharsetSelectList(true, pCharsets)
+            false
+        }
+        bde.setOnLongClickListener {
+            callCharsetSelectList(false, pCharsets)
+            false
+        }
         tti.setOnLongClickListener {
             AlertDialog.Builder(this).setTitle(R.string.info).setMessage(R.string.info_content).setIcon(R.mipmap.ic_launcher).show()
             true
@@ -43,19 +56,6 @@ class MainActivity : Activity() {
         if (resultCode == RESULT_OK) when (requestCode) {
             1 -> data?.data?.let { doFromFile(it) }
             2 -> data?.data?.let { save2Uri(it) }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String?>,
-        grantResults: IntArray
-    ) {
-        when (requestCode) {
-            1 -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) pickFile()
-                else Toast.makeText(this, R.string.permissionDenied, Toast.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -112,20 +112,6 @@ class MainActivity : Activity() {
         startActivityForResult(intent, 2)
     }
 
-    private fun checkReadPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N && ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                1
-            )
-            false
-        } else true
-    }
-
     private fun pickFile() {
         val i = Intent(Intent.ACTION_GET_CONTENT)
         i.type = "*/*"
@@ -148,17 +134,17 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun clickButton(isEncode: Boolean, cm:ClipboardManager){
+    private fun clickButton(isEncode: Boolean, cm:ClipboardManager, pc: PropertiesTools){
         val tin = if(isEncode)ten else tde
         val tou = if(isEncode)tde else ten
         tin.text?.let {
             if(it.isNotEmpty()){
                 val inputFile = generateCacheFile("input")
                 val outputFile = generateCacheFile("output")
-                inputFile.writeText(it.toString(), Charsets.UTF_16BE)
+                inputFile.writeText(it.toString(), getCharset(getCustomCharsetPosition(isEncode, pc)))
                 if(isEncode) encode(inputFile.absolutePath, outputFile.absolutePath)
                 else decode(inputFile.absolutePath, outputFile.absolutePath)
-                tou.setText(outputFile.readText(Charsets.UTF_16BE))
+                tou.setText(outputFile.readText(getCharset(getCustomCharsetPosition(!isEncode, pc))))
                 copyText(tou, cm)
             }
         }
@@ -169,6 +155,41 @@ class MainActivity : Activity() {
         val r = Rect()
         window.decorView.rootView.getWindowVisibleDisplayFrame(r)
         tti.visibility = if(h > r.bottom) View.GONE else View.VISIBLE
+    }
+
+    private fun callCharsetSelectList(isEncode: Boolean, pc: PropertiesTools){
+        val charsetsArr = resources.getStringArray(R.array.charsets)
+        AlertDialog.Builder(this)
+                .setTitle(R.string.select_charset)
+                .setIcon(R.mipmap.ic_launcher)
+                .setSingleChoiceItems(ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, charsetsArr), getCustomCharsetPosition(isEncode, pc)){ d, p ->
+                    setCustomCharsetPosition(p, isEncode, pc)
+                    d.cancel()
+                }.show()
+    }
+
+    private fun getCustomCharsetPosition(isEncode: Boolean, pc: PropertiesTools): Int{
+        val cs = if(isEncode) pc["encode"] else pc["decode"]
+        return if(cs == "null"){
+            if(isEncode) 8 else 3
+        }else cs.toInt()
+    }
+
+    private fun setCustomCharsetPosition(p: Int, isEncode: Boolean, pc: PropertiesTools){
+        pc[if(isEncode) "encode" else "decode"] = p.toString()
+    }
+
+    private fun getCharset(p: Int) = when (p) {
+        0 -> Charsets.ISO_8859_1
+        1 -> Charsets.US_ASCII
+        2 -> Charsets.UTF_16
+        3 -> Charsets.UTF_16BE
+        4 -> Charsets.UTF_16LE
+        5 -> Charsets.UTF_32
+        6 -> Charsets.UTF_32BE
+        7 -> Charsets.UTF_32LE
+        8 -> Charsets.UTF_8
+        else -> Charset.defaultCharset()
     }
 
     /**

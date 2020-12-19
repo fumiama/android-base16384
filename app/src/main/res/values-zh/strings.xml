@@ -16,4 +16,5 @@
     <string name="info">关于</string>
     <string name="info_content">作者：源文雨。感谢咲桜动漫社成员的支持。</string>
     <string name="copied">已复制</string>
+    <string name="select_charset">选择字符集</string>
 </resources>
