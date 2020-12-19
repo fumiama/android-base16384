@@ -16,4 +16,6 @@
     <string name="info_content">Author: Fumiama, with precious supports from the members in Sakura Anime Club.</string>
     <string name="copied">Copied Text</string>
     <string name="select_charset">Select Charset</string>
+    <string name="alert">Alert</string>
+    <string name="force_decode">Force Decode?</string>
 </resources>

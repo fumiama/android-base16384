@@ -26,13 +26,29 @@ import java.io.FileInputStream
 import java.nio.charset.Charset
 
 class MainActivity : Activity() {
+    var forceDecode = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val pCharsets = PropertiesTools(File(filesDir, "charsets.prop"))
+
         sv.viewTreeObserver.addOnGlobalLayoutListener { setTitleVisibility() }
         fab.setOnClickListener { pickFile() }
+        fab.setOnLongClickListener {
+            AlertDialog.Builder(this)
+                    .setTitle(R.string.alert)
+                    .setMessage(R.string.force_decode)
+                    .setIcon(R.mipmap.ic_launcher)
+                    .setPositiveButton(android.R.string.ok){ _, _ ->
+                        forceDecode = true
+                        pickFile()
+                    }
+                    .setNegativeButton(android.R.string.cancel){ _, _ ->}
+                    .show()
+            false
+        }
         ben.setOnClickListener { clickButton(true, cm, pCharsets) }
         bde.setOnClickListener { clickButton(false, cm, pCharsets) }
         ben.setOnLongClickListener {
@@ -67,7 +83,8 @@ class MainActivity : Activity() {
         val br = inputFile.inputStream()
         br.read(bbf)
         br.close()
-        val isDecode = bbf[0] == (-2).toByte() && bbf[1] == (-1).toByte()
+        val isDecode = (bbf[0] == (-2).toByte() && bbf[1] == (-1).toByte()) || forceDecode
+        if (forceDecode) forceDecode = false
 
         val re = if(isDecode) decode(inputFile.absolutePath, outputFile.absolutePath)
         else encode(inputFile.absolutePath, outputFile.absolutePath)
