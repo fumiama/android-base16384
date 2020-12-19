@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="charsets">
+        <item>ISO_8859_1</item>
+        <item>US_ASCII</item>
+        <item>UTF_16</item>
+        <item>UTF_16BE</item>
+        <item>UTF_16LE</item>
+        <item>UTF_32</item>
+        <item>UTF_32BE</item>
+        <item>UTF_32LE</item>
+        <item>UTF_8</item>
+    </string-array>
+</resources>
