@@ -1,6 +1,8 @@
 # Base16384 for Android
 > 本项目的核心基于[Base16384](https://github.com/fumiama/base16384)，这是使用`JNI`适配的安卓版本，支持深色模式主题，使用`Material Design`
+
 应用已上架[Google Play](https://play.google.com/store/apps/details?id=top.fumiama.base16384)
+
 # 功能
 - 进行文本的编码/译码
 - 从系统文件管理器选择任意二进制文件进行编码/译码
