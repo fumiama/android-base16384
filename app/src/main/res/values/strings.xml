@@ -18,4 +18,5 @@
     <string name="select_charset">Select Charset</string>
     <string name="alert">Alert</string>
     <string name="force_decode">Force Decode?</string>
+    <string name="use_lzma">Use Compress</string>
 </resources>
