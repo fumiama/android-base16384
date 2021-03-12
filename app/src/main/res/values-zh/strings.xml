@@ -19,4 +19,5 @@
     <string name="select_charset">选择字符集</string>
     <string name="alert">提示</string>
     <string name="force_decode">执行强制解码？</string>
+    <string name="use_lzma">使用压缩</string>
 </resources>
