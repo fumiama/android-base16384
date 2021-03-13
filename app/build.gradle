@@ -12,7 +12,7 @@ android {
         applicationId "top.fumiama.base16384"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 10
+        versionCode 11
         versionName '2.1.1'
         resConfigs "zh", "en"
 
