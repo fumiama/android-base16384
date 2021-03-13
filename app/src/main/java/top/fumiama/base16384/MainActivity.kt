@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Switch
 import android.widget.Toast
+import androidx.documentfile.provider.DocumentFile
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.android.synthetic.main.activity_main.*
 import top.fumiama.base16384.tools.PropertiesTools
@@ -82,10 +83,12 @@ class MainActivity : Activity() {
         val isDecode = (bbf[0] == (-2).toByte() && bbf[1] == (-1).toByte()) || forceDecode
         if (forceDecode) forceDecode = false
 
-        val re = base16(!isDecode, inputFile.absolutePath, outputFile.absolutePath)
+        val re = base16(!isDecode, inputFile.absolutePath, outputFile.absolutePath, true)
+        val fileName = DocumentFile.fromSingleUri(this, uri)?.name?:getString(R.string.output)
+        val frontName = fileName.substringBeforeLast('.')
         runOnUiThread {
             if(re != "") Toast.makeText(this, re, Toast.LENGTH_SHORT).show()
-            else createFile(getString(R.string.output))
+            else createFile(if(isDecode) frontName else "$fileName.txt")
         }
     }.start()
 
@@ -131,7 +134,7 @@ class MainActivity : Activity() {
     private fun copyText(t: TextInputEditText, cm: ClipboardManager){
         if(t.text?.isNotEmpty() == true) {
             ClipData.newPlainText(getString(R.string.app_name), t.text)?.let { cm.setPrimaryClip(it) }
-            Toast.makeText(this, getString(R.string.copied)+t.text, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -161,14 +164,18 @@ class MainActivity : Activity() {
         }
     }.start()
     
-    private fun base16(isEncode: Boolean, sf: String, of: String): String {
+    private fun base16(isEncode: Boolean, sf: String, of: String, makeToast: Boolean = false): String {
         var re = ""
+        var bre = 0
         if(sl.isChecked) {
             val tf = generateCacheFile("lzma_temp").absolutePath
             if(isEncode) re += lzma(sf, tf, true)
-            base16384(isEncode, if(isEncode) tf else sf, if(isEncode) of else tf)
+            bre = base16384(isEncode, if(isEncode) tf else sf, if(isEncode) of else tf)
             if(!isEncode) re += lzma(tf, of, false)
-        } else base16384(isEncode, sf, of)
+        } else bre = base16384(isEncode, sf, of)
+        if(makeToast) runOnUiThread {
+            Toast.makeText(this, if(bre == 0) (if(isEncode) R.string.encode_succeed else R.string.decode_succeed) else R.string.read_file_err, Toast.LENGTH_SHORT).show()
+        }
         return re
     }
 
@@ -228,7 +235,7 @@ class MainActivity : Activity() {
     }
 
     /**
-     * A native method that is implemented by the 'native-lib' native library,
+     * Native methods that are implemented by native libraries,
      * which is packaged with this application.
      */
     private external fun encode(sf: String, df: String): Int
@@ -236,7 +243,7 @@ class MainActivity : Activity() {
     private external fun lzma(sf: String, df: String, isEncode: Boolean): String
 
     companion object {
-        // Used to load the 'native-lib' library on application startup.
+        // Used to load libraries on application startup.
         init {
             System.loadLibrary("2_14")
             System.loadLibrary("lzma")
