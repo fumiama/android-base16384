@@ -67,7 +67,10 @@ class MainActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) when (requestCode) {
-            1 -> data?.data?.let { doFromFile(it) }
+            1 -> data?.data?.let {
+                Toast.makeText(this, "${getString(R.string.output)}...", Toast.LENGTH_SHORT).show()
+                doFromFile(it)
+            }
             2 -> data?.data?.let { save2Uri(it) }
         }
     }
@@ -105,7 +108,7 @@ class MainActivity : Activity() {
         fd?.close()
     }
 
-    private fun save2Uri(uri: Uri){
+    private fun save2Uri(uri: Uri) = Thread{
         val outputFile = generateCacheFile("output")
         contentResolver.openOutputStream(uri)?.let {
             val fi = outputFile.inputStream()
@@ -113,15 +116,18 @@ class MainActivity : Activity() {
             fi.close()
             it.close()
         }
-    }
+        runOnUiThread {
+            Toast.makeText(this, "${getString(R.string.share)} ${getString(R.string.succeed)}", Toast.LENGTH_SHORT).show()
+        }
+    }.start()
 
-    private fun createFile(fileName: String, type: String = "*/*"){
+    private fun createFile(fileName: String, type: String = "*/*") = Thread{
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = type
         intent.putExtra(Intent.EXTRA_TITLE, fileName)
         startActivityForResult(intent, 2)
-    }
+    }.start()
 
     private fun pickFile() {
         val i = Intent(Intent.ACTION_GET_CONTENT)
