@@ -172,7 +172,7 @@ class MainActivity : Activity() {
     
     private fun base16(isEncode: Boolean, sf: String, of: String, makeToast: Boolean = false): String {
         var re = ""
-        var bre = 0
+        val bre: Int
         if(sl.isChecked) {
             val tf = generateCacheFile("lzma_temp").absolutePath
             if(isEncode) re += lzma(sf, tf, true)
@@ -251,7 +251,7 @@ class MainActivity : Activity() {
     companion object {
         // Used to load libraries on application startup.
         init {
-            System.loadLibrary("2_14")
+            System.loadLibrary("base14")
             System.loadLibrary("lzma")
         }
     }
