@@ -12,8 +12,8 @@ android {
         applicationId "top.fumiama.base16384"
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 13
-        versionName '3.0.1'
+        versionCode 14
+        versionName '3.1'
         resConfigs "zh", "en"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

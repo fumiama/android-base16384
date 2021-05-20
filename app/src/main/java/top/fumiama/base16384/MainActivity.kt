@@ -9,6 +9,8 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Switch
@@ -156,15 +158,23 @@ class MainActivity : Activity() {
         val tou = if(isEncode)tde else ten
         tin.text?.let {
             if(it.isNotEmpty()){
-                val inputFile = generateCacheFile("input")
-                val outputFile = generateCacheFile("output")
-                
-                inputFile.writeText(it.toString(), getCharset(getCustomCharsetPosition(isEncode, pc)))
-                val re = base16(isEncode, inputFile.absolutePath, outputFile.absolutePath)
-                runOnUiThread {
-                    tou.setText(outputFile.readText(getCharset(getCustomCharsetPosition(!isEncode, pc))))
-                    copyText(tou, cm)
-                    if(re != "") Toast.makeText(this, re, Toast.LENGTH_SHORT).show()
+                if(sl.isChecked) {
+                    val inputFile = generateCacheFile("input")
+                    val outputFile = generateCacheFile("output")
+
+                    inputFile.writeText(it.toString(), getCharset(getCustomCharsetPosition(isEncode, pc)))
+                    val re = base16(isEncode, inputFile.absolutePath, outputFile.absolutePath)
+                    runOnUiThread {
+                        tou.setText(outputFile.readText(getCharset(getCustomCharsetPosition(!isEncode, pc))))
+                        copyText(tou, cm)
+                        if(re != "") Toast.makeText(this, re, Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    val re = base16(isEncode, it.toString().toByteArray(getCharset(getCustomCharsetPosition(isEncode, pc))))
+                    if(re.isNotEmpty()) runOnUiThread {
+                        tou.setText(re.toString(getCharset(getCustomCharsetPosition(!isEncode, pc))))
+                        copyText(tou, cm)
+                    }
                 }
             }
         }
@@ -184,6 +194,8 @@ class MainActivity : Activity() {
         }
         return re
     }
+
+    private fun base16(isEncode: Boolean, input: ByteArray) = if(isEncode) encodeByteArray(input) else decodeByteArray(input)
 
     private fun base16384(isEncode: Boolean, sf: String, of: String): Int = if(isEncode) encode(sf, of) else decode(sf, of)
 
@@ -246,6 +258,8 @@ class MainActivity : Activity() {
      */
     private external fun encode(sf: String, df: String): Int
     private external fun decode(sf: String, df: String): Int
+    private external fun encodeByteArray(buf: ByteArray): ByteArray
+    private external fun decodeByteArray(buf: ByteArray): ByteArray
     private external fun lzma(sf: String, df: String, isEncode: Boolean): String
 
     companion object {
