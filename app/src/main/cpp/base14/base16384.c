@@ -21,6 +21,7 @@ int encode_file(const char* input, const char* output) {
 						puts("Write file error!");
                         return 1;
 					}
+					free(ld->data);
 					free(ld);
 				}
 				free(bufi);
@@ -77,6 +78,7 @@ int decode_file(const char* input, const char* output) {
 						puts("Write file error!");
                         return 1;
 					}
+					free(ld->data);
 					free(ld);
 				}
 				free(bufi);

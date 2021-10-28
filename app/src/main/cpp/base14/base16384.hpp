@@ -19,8 +19,8 @@ struct LENDAT {
 };
 typedef struct LENDAT LENDAT;
 
-extern "C" LENDAT* encode(const uint8_t* data, const u_int32_t len);
-extern "C" LENDAT* decode(const uint8_t* data, const u_int32_t len);
+extern "C" LENDAT* encode(const uint8_t* data, const uint32_t len);
+extern "C" LENDAT* decode(const uint8_t* data, const uint32_t len);
 #endif
 #ifdef CPUBIT64
 #define B14BUFSIZ 16384
@@ -30,8 +30,8 @@ struct LENDAT {
 };
 typedef struct LENDAT LENDAT;
 
-extern "C" LENDAT* encode(const uint8_t* data, const u_int64_t len);
-extern "C" LENDAT* decode(const uint8_t* data, const u_int64_t len);
+extern "C" LENDAT* encode(const uint8_t* data, const uint64_t len);
+extern "C" LENDAT* decode(const uint8_t* data, const uint64_t len);
 #endif
 
 extern "C" int encode_file(const char* input, const char* output);
