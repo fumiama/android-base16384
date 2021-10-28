@@ -7,12 +7,22 @@
     android:layout_gravity="center"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_dere"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Switch
         android:id="@+id/sl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/rndbg_white"
-        android:padding="8dp"
+        android:minHeight="32dp"
+        android:padding="12dp"
         android:text="@string/use_lzma"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

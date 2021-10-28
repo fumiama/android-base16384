@@ -14,14 +14,13 @@
 }
 
 #define exe_byte(fun) {\
-uint32_t len = env->GetArrayLength(buf);\
+    jsize len = env->GetArrayLength(buf);\
     const uint8_t* data = (uint8_t*)env->GetByteArrayElements(buf, JNI_FALSE);\
     LENDAT* ld = fun(data, len);\
     jbyteArray out = env->NewByteArray(ld->len);\
-    auto out_data = env->GetByteArrayElements(out, JNI_FALSE);\
-    memcpy(out_data, ld->data, ld->len);\
+    env->SetByteArrayRegion(out, 0, ld->len, reinterpret_cast<const jbyte *>(ld->data));\
+    free(ld->data);\
     free(ld);\
-    env->ReleaseByteArrayElements(out, out_data, JNI_COMMIT);\
     return out;\
 }
 
