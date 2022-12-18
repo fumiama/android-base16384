@@ -5,36 +5,22 @@
 #ifndef BASE16384_BASE16384_HPP
 #define BASE16384_BASE16384_HPP
 #include <stdint.h>
+#include "base16384.h"
 
-#ifndef CPUBIT32
-    #ifndef CPUBIT64
-        #define CPUBIT32
-    #endif
-#endif
-#ifdef CPUBIT32
-#define B14BUFSIZ 8192
-struct LENDAT {
-    uint8_t* data;
-    uint32_t len;
-};
-typedef struct LENDAT LENDAT;
+// base16384_encode encodes data and write result into buf
+extern "C" int base16384_encode(const char* data, int dlen, char* buf, int blen);
 
-extern "C" LENDAT* encode(const uint8_t* data, const uint32_t len);
-extern "C" LENDAT* decode(const uint8_t* data, const uint32_t len);
-#endif
-#ifdef CPUBIT64
-#define B14BUFSIZ 16384
-struct LENDAT {
-    uint8_t* data;
-    uint64_t len;
-};
-typedef struct LENDAT LENDAT;
+// base16384_decode decodes data and write result into buf
+extern "C" int base16384_decode(const char* data, int dlen, char* buf, int blen);
 
-extern "C" LENDAT* encode(const uint8_t* data, const uint64_t len);
-extern "C" LENDAT* decode(const uint8_t* data, const uint64_t len);
-#endif
+// base16384_encode_file encodes input file to output file.
+//    use `-` to specify stdin/stdout
+//    encbuf & decbuf must be no less than BASE16384_ENCBUFSZ & BASE16384_DECBUFSZ
+extern "C" base16384_err_t base16384_encode_file(const char* input, const char* output, char* encbuf, char* decbuf);
 
-extern "C" int encode_file(const char* input, const char* output);
-extern "C" int decode_file(const char* input, const char* output);
+// base16384_decode_file decodes input file to output file.
+//    use `-` to specify stdin/stdout
+//    encbuf & decbuf must be no less than BASE16384_ENCBUFSZ & BASE16384_DECBUFSZ
+extern "C" base16384_err_t base16384_decode_file(const char* input, const char* output, char* encbuf, char* decbuf);
 
 #endif //BASE16384_BASE16384_HPP
